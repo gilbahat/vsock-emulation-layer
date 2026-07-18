@@ -1,0 +1,9 @@
+# build artifacts
+/vsock-emu
+/tests/vsock_echo
+/libvsock_unix.dylib
+*.o
+*.dSYM/
+
+# local editor / tooling state
+/.claude/settings.local.json
