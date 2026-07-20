@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish release
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify build & tests before releasing
+        run: make clean && make test
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes
+
+  bump-formula:
+    name: Bump Homebrew formula
+    needs: release
+    runs-on: ubuntu-latest
+    # Requires a repo secret HOMEBREW_TAP_TOKEN: a fine-grained PAT with
+    # contents:write on gilbahat/homebrew-taps. Skipped if the secret is absent
+    # (e.g. the very first release, whose formula is authored by hand).
+    if: ${{ github.repository_owner == 'gilbahat' }}
+    steps:
+      - name: Bump formula in tap
+        uses: mislav/bump-homebrew-formula-action@v3
+        if: ${{ env.COMMITTER_TOKEN != '' }}
+        with:
+          formula-name: vsock-emulation-layer
+          homebrew-tap: gilbahat/homebrew-taps
+          tag-name: ${{ github.ref_name }}
+          download-url: https://github.com/gilbahat/vsock-emulation-layer/archive/refs/tags/${{ github.ref_name }}.tar.gz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}

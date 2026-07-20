@@ -1,0 +1,60 @@
+name: Bug report
+description: Something doesn't work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. This is a macOS-only facility; please include the
+        environment details below so issues are reproducible.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands and their output.
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Which adapter tier?
+      options:
+        - "1 — interposer (DYLD_INSERT_LIBRARIES)"
+        - "2 — library mode (linked dylib)"
+        - "3 — vsock_unix_* helpers"
+        - "4 — freestanding / raw syscalls"
+        - "Not applicable / unsure"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      description: Output of `sw_vers -productVersion`.
+      placeholder: "26.5.2"
+    validations:
+      required: true
+  - type: input
+    id: arch
+    attributes:
+      label: Architecture
+      description: Output of `uname -m`.
+      placeholder: "arm64"
+    validations:
+      required: true
+  - type: textarea
+    id: otool
+    attributes:
+      label: otool -L of the affected binary (interposition issues)
+      description: Helps diagnose tier 1/2 problems. Optional otherwise.
+      render: shell
+    validations:
+      required: false

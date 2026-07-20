@@ -1,5 +1,9 @@
 # vsock-emulation-layer
 
+[![CI](https://github.com/gilbahat/vsock-emulation-layer/actions/workflows/ci.yml/badge.svg)](https://github.com/gilbahat/vsock-emulation-layer/actions/workflows/ci.yml)
+[![License: ISC](https://img.shields.io/badge/license-ISC-blue.svg)](LICENSE)
+[![Homebrew tap](https://img.shields.io/badge/homebrew-gilbahat%2Ftaps-orange)](https://github.com/gilbahat/homebrew-taps)
+
 Emulate Linux `AF_VSOCK` over Unix domain sockets on **macOS**, where there is
 no usable vsock (macOS 26 ships the `<sys/vsock.h>` ABI types but
 `socket(AF_VSOCK, …)` still fails with *"Operation not supported by device"*).
@@ -117,11 +121,27 @@ by tier 1 or 2 on macOS and by real vsock on Linux:
 #endif                             #endif
 ```
 
+## Install
+
+Via Homebrew (installs `vsock-emu`, `libvsock_unix.dylib`, and `vsock_unix.h`):
+
+```sh
+brew tap gilbahat/taps
+brew install vsock-emulation-layer
+```
+
+The dylib lands at `$(brew --prefix)/lib/libvsock_unix.dylib` (use it for tier 1
+injection or tier 2 linking) and the header at
+`$(brew --prefix)/include/vsock_unix.h`.
+
+Or build from source (see below).
+
 ## Build & test
 
 ```sh
 make            # builds vsock-emu, tests/vsock_echo, libvsock_unix.dylib
 make test       # runs the self-tests
+make install    # installs under PREFIX (default /usr/local); honours DESTDIR
 ```
 
 - `tests/run_convention.sh`: two `vsock-emu` peers exchange data over the

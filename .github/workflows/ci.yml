@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: build & test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # macos-14/15 are Apple silicon (arm64); macos-13 is Intel (x86_64).
+        os: [macos-15, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain info
+        run: |
+          sw_vers
+          uname -m
+          cc --version
+
+      - name: Build and run self-tests
+        run: make clean && make test
+
+      - name: Strict build (warnings as errors)
+        run: |
+          make clean
+          make CFLAGS="-O2 -g -Wall -Wextra -Wno-unused-parameter -Werror"
+
+      - name: Install smoke test
+        run: |
+          prefix="$(mktemp -d)/p"
+          make install PREFIX="$prefix"
+          test -x "$prefix/bin/vsock-emu"
+          test -f "$prefix/lib/libvsock_unix.dylib"
+          test -f "$prefix/include/vsock_unix.h"
+          make uninstall PREFIX="$prefix"

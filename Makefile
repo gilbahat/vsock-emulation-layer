@@ -7,11 +7,21 @@
 #
 #   make            build everything
 #   make test       build + run the self-tests
+#   make install    install vsock-emu, libvsock_unix.dylib, vsock_unix.h under PREFIX
+#   make uninstall  remove the installed files
 #   make clean
 
 CC      ?= cc
 CFLAGS  ?= -O2 -g -Wall -Wextra -Wno-unused-parameter
 CPPFLAGS += -I$(CURDIR)
+
+# Install layout (overridable; Homebrew passes PREFIX=#{prefix}). DESTDIR is
+# honoured for staged installs.
+PREFIX  ?= /usr/local
+BINDIR  ?= $(PREFIX)/bin
+LIBDIR  ?= $(PREFIX)/lib
+INCDIR  ?= $(PREFIX)/include
+INSTALL ?= install
 
 BINS    := vsock-emu tests/vsock_echo
 DYLIB   := libvsock_unix.dylib
@@ -39,6 +49,22 @@ test: all
 	@sh tests/run_convention.sh
 	@echo "== interposer: unchanged AF_VSOCK vsock_echo, injected at runtime =="
 	@sh tests/run_interposer.sh
+
+# Install the consumable pieces: the host peer CLI, the interposer/library-mode
+# dylib, and the convention header. tests/vsock_echo is a test vehicle and is
+# intentionally not installed.
+.PHONY: install
+install: vsock-emu $(DYLIB)
+	$(INSTALL) -d $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(INCDIR)
+	$(INSTALL) -m 0755 vsock-emu $(DESTDIR)$(BINDIR)/vsock-emu
+	$(INSTALL) -m 0755 $(DYLIB) $(DESTDIR)$(LIBDIR)/$(DYLIB)
+	$(INSTALL) -m 0644 vsock_unix.h $(DESTDIR)$(INCDIR)/vsock_unix.h
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/vsock-emu
+	rm -f $(DESTDIR)$(LIBDIR)/$(DYLIB)
+	rm -f $(DESTDIR)$(INCDIR)/vsock_unix.h
 
 .PHONY: clean
 clean:

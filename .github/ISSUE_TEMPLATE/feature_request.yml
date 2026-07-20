@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an enhancement
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a deliberately small, dependency-free facility. Proposals that
+        keep it tiny and auditable are the most likely to land — see
+        CONTRIBUTING.md. Changes to the `(cid,port)->path` convention itself
+        should be discussed here first, since they affect every consumer.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that isn't possible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: checkboxes
+    id: convention
+    attributes:
+      label: Convention impact
+      options:
+        - label: This proposal changes the `(cid,port)->path` convention.
