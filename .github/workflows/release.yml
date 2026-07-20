@@ -12,7 +12,7 @@ jobs:
     name: Publish release
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Verify build & tests before releasing
         run: make clean && make test
